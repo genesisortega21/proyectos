@@ -21,32 +21,23 @@ jobs:
       with:
         fetch-depth: 0
     
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        node-version: 18.x # Usa la última versión LTS compatible
+        python-version: '3.x'
     
-    - name: Cache SonarQube packages
-      uses: actions/cache@v3
-      with:
-        path: ~\sonar\cache
-        key: ${{ runner.os }}-sonar
-        restore-keys: ${{ runner.os }}-sonar
+    - name: Install SonarScanner
+      run: |
+        pip install sonar-scanner
     
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
-    
-    - name: Build and analyze
+    - name: Scan with SonarQube
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
       run: |
-        mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-        -Dsonar.projectKey=your-project-key \
-        -Dsonar.host.url=$SONAR_HOST_URL \
-        -Dsonar.login=$SONAR_TOKEN
+        sonar-scanner \
+          -Dsonar.projectKey=prueba \
+          -Dsonar.sources=. \
+          -Dsonar.host.url=$SONAR_HOST_URL \
+          -Dsonar.login=$SONAR_TOKEN
